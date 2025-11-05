@@ -1,0 +1,73 @@
+function parseCSVLine(line: string): string[] {
+  const values: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    const nextChar = line[i + 1];
+    
+    if (char === '"') {
+      if (inQuotes && nextChar === '"') {
+        // Escaped quote
+        current += '"';
+        i++; // Skip next quote
+      } else {
+        // Toggle quote state
+        inQuotes = !inQuotes;
+      }
+    } else if (char === ',' && !inQuotes) {
+      // End of field
+      values.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  
+  // Push last field
+  values.push(current.trim());
+  
+  return values;
+}
+
+export function parseCSV(csvText: string): Record<string, string>[] {
+  const lines = csvText.trim().split('\n');
+  if (lines.length === 0) return [];
+
+  // Parse header
+  const headers = parseCSVLine(lines[0]);
+  
+  // Parse data rows
+  const rows: Record<string, string>[] = [];
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line.trim()) continue;
+    
+    const values = parseCSVLine(line);
+    const row: Record<string, string> = {};
+    
+    headers.forEach((header, index) => {
+      row[header] = values[index] || '';
+    });
+    
+    rows.push(row);
+  }
+  
+  return rows;
+}
+
+export async function loadCSVData(filePath: string): Promise<Record<string, string>[]> {
+  try {
+    const response = await fetch(filePath);
+    if (!response.ok) {
+      throw new Error(`Failed to load ${filePath}: ${response.statusText}`);
+    }
+    const csvText = await response.text();
+    return parseCSV(csvText);
+  } catch (error) {
+    console.error(`Error loading CSV from ${filePath}:`, error);
+    return [];
+  }
+}
+

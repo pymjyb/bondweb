@@ -1,0 +1,7 @@
+id,name,description,image,keyData,contact,link
+blackrock,BlackRock Inc.,One of the world's largest asset management firms with extensive holdings in government bonds across multiple countries.,,Assets under management: $10 trillion+,contact@blackrock.com,https://www.blackrock.com
+vanguard,The Vanguard Group,Leading investment management company known for index funds and government bond investments.,,Assets under management: $8 trillion+,investor@vanguard.com,https://www.vanguard.com
+pimco,PIMCO,Global investment management firm specializing in fixed income securities including government bonds.,,Assets under management: $2.2 trillion+,info@pimco.com,https://www.pimco.com
+fidelity,Fidelity Investments,Major financial services corporation with significant government bond portfolio management.,,Assets under management: $4.9 trillion+,contact@fidelity.com,https://www.fidelity.com
+state-street,State Street Global Advisors,One of the largest asset managers with expertise in government bond ETFs and active management.,,Assets under management: $4.1 trillion+,info@ssga.com,https://www.ssga.com
+
