@@ -50,7 +50,7 @@ A modern, responsive static website built with Vite + React + TypeScript + Tailw
 1. Clone the repository:
 ```bash
 git clone <your-repo-url>
-cd cursortest
+cd bondweb
 ```
 
 2. Install dependencies:
@@ -114,7 +114,7 @@ npm install --save-dev gh-pages
 ```
 
 2. Update `vite.config.ts` to set the correct `base` path:
-   - If your repo name is `cursortest`, the base should be `/cursortest/`
+   - If your repo name is `bondweb`, the base should be `/bondweb/`
    - If deploying to a custom domain, set base to `/`
 
 3. Deploy:
@@ -176,13 +176,13 @@ npm run build
    - Choose `main` branch and `/docs` folder
    - Click Save
 
-**Important:** If using this method, update `vite.config.ts` to set `base: '/'` (not `/cursortest/`)
+**Important:** If using this method, update `vite.config.ts` to set `base: '/'` (not `/bondweb/`)
 
 ## Customization
 
 ### Updating the Base Path
 
-If your repository name differs from `cursortest`, update the `base` field in `vite.config.ts`:
+If your repository name differs from `bondweb`, update the `base` field in `vite.config.ts`:
 
 ```typescript
 export default defineConfig({
