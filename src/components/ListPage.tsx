@@ -13,8 +13,9 @@ export default function ListPage({ type }: ListPageProps) {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      // Public assets are served from root, base path is handled automatically
-      const data = await loadCSVData(`${import.meta.env.BASE_URL}data/${type}.csv`);
+      const baseUrl = new URL(import.meta.env.BASE_URL || '/', window.location.origin);
+      const csvUrl = new URL(`data/${type}.csv`, baseUrl);
+      const data = await loadCSVData(csvUrl.toString());
       setItems(data);
       setLoading(false);
     };
@@ -69,4 +70,3 @@ export default function ListPage({ type }: ListPageProps) {
     </div>
   );
 }
-

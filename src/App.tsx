@@ -5,8 +5,10 @@ import ListPage from './components/ListPage';
 import DetailPage from './components/DetailPage';
 
 function App() {
+  const basename = import.meta.env.BASE_URL.replace(/\/$/, '');
+
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <div className="min-h-screen bg-gray-50">
         <Navbar />
         <Routes>
@@ -22,4 +24,3 @@ function App() {
 }
 
 export default App;
-
