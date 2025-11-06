@@ -58,7 +58,14 @@ export function parseCSV(csvText: string): Record<string, string>[] {
 }
 
 export async function loadCSVData(filePath: string): Promise<Record<string, string>[]> {
-  const response = await fetch(filePath);
+  // Add cache-busting query parameter to ensure fresh data
+  // Handle both absolute and relative paths
+  const separator = filePath.includes('?') ? '&' : '?';
+  const urlWithCache = `${filePath}${separator}v=${Date.now()}`;
+  
+  const response = await fetch(urlWithCache, {
+    cache: 'no-cache',
+  });
   
   if (!response.ok) {
     throw new Error(`Failed to load CSV: ${response.status} ${response.statusText}`);
