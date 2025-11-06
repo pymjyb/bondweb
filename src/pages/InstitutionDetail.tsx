@@ -105,26 +105,40 @@ export default function InstitutionDetail() {
             </div>
           )}
 
-          {/* Custom Fields */}
-          {Object.keys(institution).filter(key => 
-            !['id', 'name', 'category', 'country', 'description', 'website'].includes(key) &&
-            institution[key]
-          ).length > 0 && (
-            <div className="border-t border-gray-200 pt-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-3">Additional Information</h2>
-              <dl className="space-y-3">
-                {Object.keys(institution).filter(key => 
-                  !['id', 'name', 'category', 'country', 'description', 'website'].includes(key) &&
-                  institution[key]
-                ).map(key => (
-                  <div key={key}>
-                    <dt className="text-sm font-medium text-gray-500 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</dt>
-                    <dd className="mt-1 text-gray-900">{institution[key]}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          )}
+          {/* Custom Fields and Additional Fields */}
+          {(() => {
+            const additionalFields = Object.keys(institution).filter(key => 
+              !['id', 'name', 'category', 'country', 'description', 'website'].includes(key)
+            );
+            
+            if (additionalFields.length === 0) return null;
+            
+            return (
+              <div className="border-t border-gray-200 pt-6">
+                <h2 className="text-lg font-semibold text-gray-800 mb-3">Additional Information</h2>
+                <dl className="space-y-3">
+                  {additionalFields.map(key => {
+                    const value = institution[key];
+                    // Show field even if empty, but skip if truly empty
+                    if (!value || value.trim() === '') return null;
+                    
+                    // Format field name: handle spaces and camelCase
+                    const formattedKey = key
+                      .replace(/([A-Z])/g, ' $1') // Add space before capitals
+                      .replace(/^./, str => str.toUpperCase()) // Capitalize first letter
+                      .trim();
+                    
+                    return (
+                      <div key={key}>
+                        <dt className="text-sm font-medium text-gray-500">{formattedKey}</dt>
+                        <dd className="mt-1 text-gray-900">{value}</dd>
+                      </div>
+                    );
+                  })}
+                </dl>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>

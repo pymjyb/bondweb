@@ -76,13 +76,8 @@ export async function loadCSVData(filePath: string): Promise<Record<string, stri
 }
 
 // Helper function to convert Record to Institution
-export function toInstitution(data: Record<string, string>): import('../types').Institution {
-  return {
-    id: data.id || '',
-    name: data.name || '',
-    category: data.category || '',
-    country: data.country || '',
-    description: data.description || '',
-    website: data.website || '',
-  };
+// Returns InstitutionEdit type to preserve all fields from CSV (including custom fields)
+export function toInstitution(data: Record<string, string>): Record<string, string> {
+  // Return the full record to preserve all fields including custom ones like "Total assets"
+  return { ...data };
 }

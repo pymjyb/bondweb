@@ -95,22 +95,33 @@ export function mergeInstitutions(
 ): InstitutionEdit[] {
   const data = getStorageData();
   
-  // Start with CSV data
-  let merged: InstitutionEdit[] = csvInstitutions
-    .filter(inst => !data.deletions.includes(inst.id))
-    .map(inst => {
-      // Apply modifications
+  // Start with CSV data - csvInstitutions is actually Record<string, string>[] from CSV parser
+  // which preserves all fields including "Total assets"
+  let merged: InstitutionEdit[] = (csvInstitutions as any[])
+    .filter((inst: any) => !data.deletions.includes(inst.id))
+    .map((inst: any) => {
+      // Start with all fields from CSV (already includes "Total assets" and other custom fields)
+      const instEdit: InstitutionEdit = { ...inst };
+      
+      // Apply modifications (modifications override CSV data)
       if (data.modifications[inst.id]) {
-        return { ...inst, ...data.modifications[inst.id] };
+        const modified = { ...instEdit, ...data.modifications[inst.id] };
+        // Ensure all custom fields exist
+        customFields.forEach(field => {
+          if (!(field in modified)) {
+            modified[field] = '';
+          }
+        });
+        return modified;
       }
-      // Add custom fields with empty values
-      const withCustomFields: InstitutionEdit = { ...inst };
+      
+      // Add custom fields with empty values if they don't exist
       customFields.forEach(field => {
-        if (!(field in withCustomFields)) {
-          withCustomFields[field] = '';
+        if (!(field in instEdit)) {
+          instEdit[field] = '';
         }
       });
-      return withCustomFields;
+      return instEdit;
     });
 
   // Add new institutions
@@ -118,9 +129,22 @@ export function mergeInstitutions(
     merged.push(addition);
   });
 
-  // Add custom fields to all entries
+  // Ensure all institutions have all custom fields (in case CSV has new fields not in customFields list)
+  // Get all unique field names from all institutions
+  const allFields = new Set<string>();
+  merged.forEach(inst => {
+    Object.keys(inst).forEach(key => allFields.add(key));
+  });
+  
+  // Add missing custom fields to all entries
   merged = merged.map(inst => {
     const withCustomFields: InstitutionEdit = { ...inst };
+    allFields.forEach(field => {
+      if (!(field in withCustomFields)) {
+        withCustomFields[field] = '';
+      }
+    });
+    // Also ensure localStorage custom fields exist
     customFields.forEach(field => {
       if (!(field in withCustomFields)) {
         withCustomFields[field] = '';
