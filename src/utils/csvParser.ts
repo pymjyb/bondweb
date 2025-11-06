@@ -1,4 +1,4 @@
-function parseCSVLine(line: string): string[] {
+function parseCSVLine(line: string, delimiter: string = ','): string[] {
   const values: string[] = [];
   let current = '';
   let inQuotes = false;
@@ -16,7 +16,7 @@ function parseCSVLine(line: string): string[] {
         // Toggle quote state
         inQuotes = !inQuotes;
       }
-    } else if (char === ',' && !inQuotes) {
+    } else if (char === delimiter && !inQuotes) {
       // End of field
       values.push(current.trim());
       current = '';
@@ -35,8 +35,14 @@ export function parseCSV(csvText: string): Record<string, string>[] {
   const lines = csvText.trim().split('\n').filter(line => line.trim());
   if (lines.length === 0) return [];
 
+  // Detect delimiter: check if first line contains semicolon or comma
+  // Prefer semicolon if present, otherwise use comma
+  const firstLine = lines[0];
+  const hasSemicolon = firstLine.includes(';');
+  const delimiter = hasSemicolon ? ';' : ',';
+  
   // Parse header
-  const headers = parseCSVLine(lines[0]);
+  const headers = parseCSVLine(lines[0], delimiter);
   
   // Parse data rows
   const rows: Record<string, string>[] = [];
@@ -44,11 +50,11 @@ export function parseCSV(csvText: string): Record<string, string>[] {
     const line = lines[i];
     if (!line.trim()) continue;
     
-    const values = parseCSVLine(line);
+    const values = parseCSVLine(line, delimiter);
     const row: Record<string, string> = {};
     
     headers.forEach((header, index) => {
-      row[header] = values[index] || '';
+      row[header.trim()] = (values[index] || '').trim();
     });
     
     rows.push(row);
