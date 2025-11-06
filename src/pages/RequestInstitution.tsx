@@ -40,12 +40,20 @@ export default function RequestInstitution() {
         comment: '',
       });
     } catch (err) {
-      console.error('Error submitting form:', err);
+      console.error('❌ Form submission error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to submit request';
+      console.error('Error details:', {
+        message: errorMessage,
+        error: err,
+      });
+      
       if (errorMessage.includes('not configured')) {
-        setError('Email service is not configured. Please contact the administrator.');
+        setError(
+          'Email service is not configured. ' +
+          'Please check the browser console for debug information and contact the administrator.'
+        );
       } else {
-        setError('Failed to submit request. Please try again or contact us directly.');
+        setError(`Failed to submit request: ${errorMessage}. Please try again or contact us directly.`);
       }
     } finally {
       setSubmitting(false);

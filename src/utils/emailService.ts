@@ -15,8 +15,16 @@ export async function sendInstitutionRequest(data: RequestData): Promise<void> {
   const serverlessUrl = import.meta.env.VITE_EMAIL_API_URL;
   const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || 'pymjyb@gmail.com';
 
+  // Debug logging
+  console.log('📧 Email Service Debug Info:');
+  console.log('  - VITE_FORMSPREE_ID:', formspreeId ? `"${formspreeId}" (length: ${formspreeId.length})` : 'undefined or empty');
+  console.log('  - VITE_EMAIL_API_URL:', serverlessUrl ? `"${serverlessUrl}"` : 'undefined or empty');
+  console.log('  - VITE_ADMIN_EMAIL:', adminEmail);
+  console.log('  - All env vars:', Object.keys(import.meta.env).filter(k => k.startsWith('VITE_')));
+
   // Option 1: Use Formspree (easiest - works immediately)
-  if (formspreeId) {
+  if (formspreeId && formspreeId.trim() !== '') {
+    console.log('✅ Using Formspree with ID:', formspreeId);
     const formData = new FormData();
     formData.append('_replyto', data.requesterEmail);
     formData.append('email', data.requesterEmail);
@@ -26,7 +34,10 @@ export async function sendInstitutionRequest(data: RequestData): Promise<void> {
     formData.append('_subject', `New Institution Request: ${data.institutionName}`);
     formData.append('_format', 'plain');
     
-    const response = await fetch(`https://formspree.io/f/${formspreeId}`, {
+    const url = `https://formspree.io/f/${formspreeId}`;
+    console.log('📤 Sending request to:', url);
+    
+    const response = await fetch(url, {
       method: 'POST',
       body: formData,
       headers: {
@@ -34,10 +45,16 @@ export async function sendInstitutionRequest(data: RequestData): Promise<void> {
       },
     });
 
+    console.log('📥 Response status:', response.status, response.statusText);
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Failed to send request');
+      console.error('❌ Formspree error:', errorData);
+      throw new Error(errorData.error || `Failed to send request: ${response.status} ${response.statusText}`);
     }
+    
+    const responseData = await response.json().catch(() => ({}));
+    console.log('✅ Formspree success:', responseData);
     
     // Formspree will automatically send a confirmation email if configured
     // To enable: Formspree dashboard → Form Settings → Email Notifications → Auto-responder
@@ -45,7 +62,8 @@ export async function sendInstitutionRequest(data: RequestData): Promise<void> {
   }
 
   // Option 2: Use a custom serverless function (more control, better privacy)
-  if (serverlessUrl) {
+  if (serverlessUrl && serverlessUrl.trim() !== '') {
+    console.log('✅ Using serverless function:', serverlessUrl);
     const response = await fetch(serverlessUrl, {
       method: 'POST',
       headers: {
@@ -63,12 +81,21 @@ export async function sendInstitutionRequest(data: RequestData): Promise<void> {
       }),
     });
 
+    console.log('📥 Serverless response status:', response.status, response.statusText);
+
     if (!response.ok) {
-      throw new Error('Failed to send request');
+      const errorText = await response.text().catch(() => 'Unknown error');
+      console.error('❌ Serverless error:', errorText);
+      throw new Error(`Failed to send request: ${response.status} ${response.statusText}`);
     }
+    
+    console.log('✅ Serverless function success');
     return;
   }
 
   // If no service is configured, show helpful error
+  console.error('❌ No email service configured!');
+  console.error('  - Formspree ID:', formspreeId);
+  console.error('  - Serverless URL:', serverlessUrl);
   throw new Error('Email service not configured. Please set up Formspree or a serverless function.');
 }
