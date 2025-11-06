@@ -85,6 +85,34 @@ jobs:
 
 ---
 
+### 📧 Institution Request Form
+
+Users can request to add new institutions through a form at `/request-institution`. 
+
+**Setup Instructions:**
+
+1. **Sign up for Formspree** (free tier available):
+   - Go to https://formspree.io/ and create an account
+   - Create a new form and get your Form ID
+
+2. **Configure GitHub Secrets**:
+   - Go to your repository → Settings → Secrets and variables → Actions
+   - Add secret: `VITE_FORMSPREE_ID` = your Formspree form ID
+   - Add secret: `VITE_ADMIN_EMAIL` = pymjyb@gmail.com
+
+3. **Configure Formspree**:
+   - In Formspree dashboard, set your email address to receive submissions
+   - Enable "Auto-responder" to send confirmation emails to requesters
+   - Set reply-to to use requester's email
+
+4. **Deploy**: The workflow will automatically use these secrets during build
+
+**Note:** The email address is stored as a GitHub Secret and is NOT visible in the source code or built files.
+
+For detailed setup instructions, see `README_EMAIL_SETUP.md`.
+
+---
+
 ### 🔐 Admin Password Protection
 
 The admin page is protected with a password. To change the password:

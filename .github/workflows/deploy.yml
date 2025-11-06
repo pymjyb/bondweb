@@ -16,7 +16,11 @@ jobs:
         with:
           node-version: 18
       - run: npm ci
-      - run: npm run build
+      - name: Build with environment variables
+        run: npm run build
+        env:
+          VITE_FORMSPREE_ID: ${{ secrets.VITE_FORMSPREE_ID }}
+          VITE_ADMIN_EMAIL: ${{ secrets.VITE_ADMIN_EMAIL }}
       - name: Copy index.html to 404.html for GitHub Pages SPA support
         run: cp dist/index.html dist/404.html
       - uses: peaceiris/actions-gh-pages@v3

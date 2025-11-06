@@ -5,6 +5,7 @@ import Institutions from './pages/Institutions';
 import InstitutionDetail from './pages/InstitutionDetail';
 import Admin from './pages/Admin';
 import AdminLogin from './pages/AdminLogin';
+import RequestInstitution from './pages/RequestInstitution';
 
 function App() {
   const basename = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -17,6 +18,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/institutions" element={<Institutions />} />
           <Route path="/institutions/:id" element={<InstitutionDetail />} />
+          <Route path="/request-institution" element={<RequestInstitution />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<Admin />} />
         </Routes>
