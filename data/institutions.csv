@@ -1,11 +1,89 @@
-id,name,category,country,description,website,Total assets
-blackrock,BlackRock,Asset Manager,United States,World's largest asset manager providing investment management and risk management services,https://www.blackrock.com,1000
-ecb,European Central Bank,Central Bank,European Union,Responsible for monetary policy in the euro area,https://www.ecb.europa.eu,2000
-hsbc,HSBC,Bank,United Kingdom,One of the largest banking and financial services organizations in the world,https://www.hsbc.com,3000
-mas,Monetary Authority of Singapore,Regulator,Singapore,Central bank and financial regulatory authority of Singapore,https://www.mas.gov.sg,
-vanguard,Vanguard Group,Asset Manager,United States,Leading provider of mutual funds and ETFs with a focus on low-cost investing,https://www.vanguard.com,
-federal-reserve,Federal Reserve System,Central Bank,United States,Central banking system of the United States responsible for monetary policy,https://www.federalreserve.gov,
-jp-morgan,JP Morgan Chase,Bank,United States,Global financial services firm and largest bank in the United States,https://www.jpmorgan.com,
-bank-of-england,Bank of England,Central Bank,United Kingdom,Central bank of the United Kingdom responsible for monetary policy,https://www.bankofengland.co.uk,
-MJYB,MJYB,Asset Manager,United States,MJYB is a asset manager that invests in the stock market,https://www.mjyb.com,
-artesian,Artesian Capital Management UK LLP,Asset Manager,UK,small AM active as intermed,https://find-and-update.company-information.service.gov.uk/company/OC306624,
+id;name;category;country;description;website;Total assets (USD bn)
+blackrock;BlackRock;Asset Manager;United States;World's largest asset manager providing investment management and risk management services;https://www.blackrock.com;10000
+ecb;European Central Bank;Central Bank;European Union;Responsible for monetary policy in the euro area;https://www.ecb.europa.eu;9000
+hsbc;HSBC;Bank;United Kingdom;One of the largest banking and financial services organizations in the world;https://www.hsbc.com;3000
+mas;Monetary Authority of Singapore;Regulator;Singapore;Central bank and financial regulatory authority of Singapore;https://www.mas.gov.sg;600
+vanguard;Vanguard Group;Asset Manager;United States;Leading provider of mutual funds and ETFs with a focus on low-cost investing;https://www.vanguard.com;8500
+federal-reserve;Federal Reserve System;Central Bank;United States;Central banking system of the United States responsible for monetary policy;https://www.federalreserve.gov;8500
+jp-morgan;JP Morgan Chase;Bank;United States;Global financial services firm and largest bank in the United States;https://www.jpmorgan.com;4500
+bank-of-england;Bank of England;Central Bank;United Kingdom;Central bank of the United Kingdom responsible for monetary policy;https://www.bankofengland.co.uk;1500
+MJYB;MJYB;Asset Manager;United States;MJYB is an asset manager that invests in the stock market;https://www.mjyb.com;5
+artesian;Artesian Capital Management UK LLP;Asset Manager;United Kingdom;Small asset manager active as an intermediary;https://find-and-update.company-information.service.gov.uk/company/OC306624;2
+bnp-paribas;BNP Paribas;Bank;France;Leading French bank with global operations in retail and investment banking;https://group.bnpparibas;3000
+ubs;UBS Group;Asset Manager;Switzerland;Swiss multinational investment bank and financial services company;https://www.ubs.com;4000
+credit-suisse;Credit Suisse;Bank;Switzerland;Major Swiss bank acquired by UBS in 2023;https://www.credit-suisse.com;600
+barclays;Barclays;Bank;United Kingdom;British universal bank providing financial services worldwide;https://home.barclays;1800
+bank-of-america;Bank of America;Bank;United States;One of the largest banks in the world by assets;https://www.bankofamerica.com;3800
+wells-fargo;Wells Fargo;Bank;United States;American financial services company with strong retail banking presence;https://www.wellsfargo.com;1800
+citigroup;Citigroup;Bank;United States;Global diversified financial services holding company;https://www.citigroup.com;2500
+goldman-sachs;Goldman Sachs;Investment Bank;United States;Leading global investment banking and securities firm;https://www.goldmansachs.com;1600
+morgan-stanley;Morgan Stanley;Investment Bank;United States;Global financial services firm specializing in investment banking and wealth management;https://www.morganstanley.com;1300
+state-street;State Street;Asset Manager;United States;Financial services and asset management firm specializing in institutional clients;https://www.statestreet.com;4200
+bny-mellon;BNY Mellon;Asset Manager;United States;American investment company providing asset and wealth management;https://www.bnymellon.com;1800
+pimco;PIMCO;Asset Manager;United States;Global investment management firm focused on fixed income;https://www.pimco.com;2200
+schroders;Schroders;Asset Manager;United Kingdom;UK-based asset manager offering active investment solutions;https://www.schroders.com;900
+fidelity;Fidelity Investments;Asset Manager;United States;One of the largest financial services and mutual fund companies;https://www.fidelity.com;4500
+amundi;Amundi;Asset Manager;France;Leading European asset manager;https://www.amundi.com;2200
+allianz;Allianz;Insurance;Germany;One of the world’s largest insurers and asset managers;https://www.allianz.com;1200
+axa;AXA;Insurance;France;Global insurance and investment management group;https://www.axa.com;1100
+metlife;MetLife;Insurance;United States;Major global provider of insurance and employee benefit programs;https://www.metlife.com;700
+prudential-uk;Prudential plc;Insurance;United Kingdom;UK-based international financial services group;https://www.prudentialplc.com;900
+prudential-us;Prudential Financial;Insurance;United States;American Fortune 500 insurance and investment management company;https://www.prudential.com;1500
+blackstone;Blackstone Group;Private Equity;United States;World’s largest alternative asset manager;https://www.blackstone.com;1200
+brookfield;Brookfield Asset Management;Asset Manager;Canada;Global alternative asset manager focusing on real assets;https://www.brookfield.com;900
+kkr;KKR & Co;Private Equity;United States;Leading global investment firm;https://www.kkr.com;500
+carlyle;Carlyle Group;Private Equity;United States;Global investment firm specializing in private equity;https://www.carlyle.com;400
+apollo;Apollo Global Management;Private Equity;United States;Alternative investment manager with large credit portfolio;https://www.apollo.com;650
+temasek;Temasek Holdings;Sovereign Wealth Fund;Singapore;Investment company owned by the Singapore government;https://www.temasek.com.sg;380
+gic;GIC Private Limited;Sovereign Wealth Fund;Singapore;Singapore’s sovereign wealth fund managing foreign reserves;https://www.gic.com.sg;800
+nbim;Norges Bank Investment Management;Sovereign Wealth Fund;Norway;Manages Norway’s Government Pension Fund Global;https://www.nbim.no;1600
+adia;Abu Dhabi Investment Authority;Sovereign Wealth Fund;United Arab Emirates;One of the world’s largest sovereign wealth funds;https://www.adia.ae;990
+qia;Qatar Investment Authority;Sovereign Wealth Fund;Qatar;Qatar’s sovereign wealth fund investing globally;https://www.qia.qa;475
+pif;Public Investment Fund;Sovereign Wealth Fund;Saudi Arabia;Saudi Arabia’s sovereign wealth fund investing in strategic assets;https://www.pif.gov.sa;950
+china-investment-corp;China Investment Corporation;Sovereign Wealth Fund;China;China’s sovereign wealth fund managing part of foreign reserves;https://www.china-inv.cn;1100
+nbk;National Bank of Kuwait;Bank;Kuwait;Leading bank in Kuwait with regional presence;https://www.nbk.com;120
+mufg;MUFG Bank;Bank;Japan;Largest bank in Japan and among the top globally;https://www.mufg.jp;3500
+smfg;Sumitomo Mitsui Financial Group;Bank;Japan;Major Japanese bank holding company;https://www.smfg.co.jp;2500
+mizuho;Mizuho Financial Group;Bank;Japan;Large Japanese financial services company;https://www.mizuho-fg.co.jp;2200
+icbc;Industrial and Commercial Bank of China;Bank;China;World’s largest bank by total assets;https://www.icbc.com.cn;5900
+ccb;China Construction Bank;Bank;China;One of China’s “Big Four” banks;https://www.ccb.com;5200
+abc;Agricultural Bank of China;Bank;China;Major Chinese commercial bank;https://www.abchina.com;5000
+boc;Bank of China;Bank;China;Chinese multinational banking and financial services company;https://www.boc.cn;4600
+pingan;Ping An Insurance;Insurance;China;Large Chinese insurance and financial services group;https://group.pingan.com;1300
+boa-brazil;Banco do Brasil;Bank;Brazil;Oldest and largest bank in Brazil;https://www.bb.com.br;500
+itau;Itaú Unibanco;Bank;Brazil;Largest private sector bank in Brazil;https://www.itau.com.br;450
+santander;Santander Group;Bank;Spain;Leading global bank with strong European and Latin American presence;https://www.santander.com;1900
+bbva;BBVA;Bank;Spain;Spanish multinational financial services company;https://www.bbva.com;800
+deutsche-bank;Deutsche Bank;Bank;Germany;German multinational investment bank and financial services company;https://www.db.com;1500
+commerzbank;Commerzbank;Bank;Germany;Major German bank focusing on SMEs and retail banking;https://www.commerzbank.com;600
+rbc;Royal Bank of Canada;Bank;Canada;Largest bank in Canada by market capitalization;https://www.rbc.com;1800
+td-bank;TD Bank;Bank;Canada;Major North American bank with strong retail operations;https://www.td.com;1700
+scotiabank;Scotiabank;Bank;Canada;Leading Canadian bank with presence in the Americas;https://www.scotiabank.com;1400
+cibc;CIBC;Bank;Canada;"One of the ""Big Five"" banks in Canada";https://www.cibc.com;900
+anz;ANZ Bank;Bank;Australia;Major Australian and New Zealand bank;https://www.anz.com;750
+nab;National Australia Bank;Bank;Australia;One of the four largest financial institutions in Australia;https://www.nab.com.au;700
+commonwealth-bank;Commonwealth Bank of Australia;Bank;Australia;Australia’s largest bank;https://www.commbank.com.au;1200
+westpac;Westpac;Bank;Australia;"One of Australia's ""big four"" banks";https://www.westpac.com.au;900
+rbi;Reserve Bank of India;Central Bank;India;India’s central banking institution;https://www.rbi.org.in;700
+lic;Life Insurance Corporation of India;Insurance;India;State-owned insurance and investment corporation;https://licindia.in;500
+sbi;State Bank of India;Bank;India;Largest bank in India by assets and branches;https://sbi.co.in;800
+bank-of-korea;Bank of Korea;Central Bank;South Korea;South Korea’s central bank;https://www.bok.or.kr;500
+kb-financial;KB Financial Group;Bank;South Korea;Leading financial holding company in South Korea;https://www.kbfg.com;650
+shinhan;Shinhan Financial Group;Bank;South Korea;Major South Korean financial group;https://www.shinhangroup.com;600
+dbs;DBS Bank;Bank;Singapore;Leading bank in Southeast Asia;https://www.dbs.com;700
+ocbc;OCBC Bank;Bank;Singapore;Second largest financial services group in Southeast Asia;https://www.ocbc.com;600
+uob;UOB Bank;Bank;Singapore;Major Singaporean bank with regional presence;https://www.uobgroup.com;500
+central-bank-brazil;Central Bank of Brazil;Central Bank;Brazil;Responsible for monetary policy and financial stability in Brazil;https://www.bcb.gov.br;400
+bank-of-canada;Bank of Canada;Central Bank;Canada;Canada’s central bank responsible for monetary policy;https://www.bankofcanada.ca;500
+swiss-national-bank;Swiss National Bank;Central Bank;Switzerland;Central bank of Switzerland;https://www.snb.ch;1200
+world-bank;World Bank;Development Institution;Global;Provides loans and grants to governments for development projects;https://www.worldbank.org;1000
+imf;International Monetary Fund;Development Institution;Global;Provides financial assistance and advice to member countries;https://www.imf.org;900
+bis;Bank for International Settlements;Institution;Switzerland;International financial institution serving central banks;https://www.bis.org;400
+esg;Eurazeo;Private Equity;France;European investment company focusing on private equity;https://www.eurazeo.com;35
+bridgewater;Bridgewater Associates;Hedge Fund;United States;One of the largest hedge funds in the world;https://www.bridgewater.com;150
+citadel;Citadel LLC;Hedge Fund;United States;Global financial institution focused on investment management and market making;https://www.citadel.com;60
+renaissance;Renaissance Technologies;Hedge Fund;United States;Quantitative hedge fund known for Medallion Fund;https://www.rentec.com;50
+two-sigma;Two Sigma;Hedge Fund;United States;Technology-driven quantitative investment manager;https://www.twosigma.com;60
+man-group;Man Group;Hedge Fund;United Kingdom;Global active investment management firm;https://www.man.com;140
+millennium;Millennium Management;Hedge Fund;United States;Multi-strategy hedge fund;https://www.mlp.com;60
+point72;Point72 Asset Management;Hedge Fund;United States;Investment firm founded by Steve Cohen;https://www.point72.com;30
