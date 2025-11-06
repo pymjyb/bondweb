@@ -85,6 +85,25 @@ jobs:
 
 ---
 
+### 🔐 Admin Password Protection
+
+The admin page is protected with a password. To change the password:
+
+1. Open `src/utils/auth.ts`
+2. Find the line: `const ADMIN_PASSWORD = 'admin123';`
+3. Change `'admin123'` to your desired password
+4. Rebuild and redeploy
+
+**Security Notes:**
+- This is client-side password protection (not highly secure)
+- Password is stored in the code, so anyone with access to the source code can see it
+- Session expires after 24 hours
+- For production use, consider implementing server-side authentication
+
+**Default Password:** `admin123` (change this immediately!)
+
+---
+
 ### 🎨 Design
 
 > Professional. Clean. Trust-oriented.  

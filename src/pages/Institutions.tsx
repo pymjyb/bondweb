@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { loadCSVData, toInstitution } from '../utils/csvParser';
-import { Institution } from '../types';
+import { mergeInstitutions, getStorageData, InstitutionEdit } from '../utils/storage';
 import InstitutionCard from '../components/InstitutionCard';
 
 export default function Institutions() {
-  const [institutions, setInstitutions] = useState<Institution[]>([]);
+  const [institutions, setInstitutions] = useState<InstitutionEdit[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,8 +18,12 @@ export default function Institutions() {
         const csvPath = `${baseUrl}data/institutions.csv`;
         
         const data = await loadCSVData(csvPath);
-        const institutions = data.map(toInstitution);
-        setInstitutions(institutions);
+        const csvInstitutions = data.map(toInstitution) as InstitutionEdit[];
+        
+        // Merge with localStorage edits
+        const storageData = getStorageData();
+        const merged = mergeInstitutions(csvInstitutions, storageData.customFields);
+        setInstitutions(merged);
       } catch (err) {
         console.error('Failed to load institutions:', err);
         setError(err instanceof Error ? err.message : 'Failed to load data');

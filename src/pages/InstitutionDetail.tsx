@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { loadCSVData, toInstitution } from '../utils/csvParser';
-import { Institution } from '../types';
+import { mergeInstitutions, getStorageData, InstitutionEdit } from '../utils/storage';
 
 export default function InstitutionDetail() {
   const { id } = useParams<{ id: string }>();
-  const [institution, setInstitution] = useState<Institution | null>(null);
+  const [institution, setInstitution] = useState<InstitutionEdit | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,8 +16,13 @@ export default function InstitutionDetail() {
         const csvPath = `${baseUrl}data/institutions.csv`;
         
         const data = await loadCSVData(csvPath);
-        const found = data.find((item) => item.id === id);
-        setInstitution(found ? toInstitution(found) : null);
+        const csvInstitutions = data.map(toInstitution) as InstitutionEdit[];
+        
+        // Merge with localStorage edits
+        const storageData = getStorageData();
+        const merged = mergeInstitutions(csvInstitutions, storageData.customFields);
+        const found = merged.find((item) => item.id === id);
+        setInstitution(found || null);
       } catch (error) {
         console.error('Error loading data:', error);
         setInstitution(null);
@@ -97,6 +102,27 @@ export default function InstitutionDetail() {
               >
                 {institution.website}
               </a>
+            </div>
+          )}
+
+          {/* Custom Fields */}
+          {Object.keys(institution).filter(key => 
+            !['id', 'name', 'category', 'country', 'description', 'website'].includes(key) &&
+            institution[key]
+          ).length > 0 && (
+            <div className="border-t border-gray-200 pt-6">
+              <h2 className="text-lg font-semibold text-gray-800 mb-3">Additional Information</h2>
+              <dl className="space-y-3">
+                {Object.keys(institution).filter(key => 
+                  !['id', 'name', 'category', 'country', 'description', 'website'].includes(key) &&
+                  institution[key]
+                ).map(key => (
+                  <div key={key}>
+                    <dt className="text-sm font-medium text-gray-500 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</dt>
+                    <dd className="mt-1 text-gray-900">{institution[key]}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
           )}
         </div>
