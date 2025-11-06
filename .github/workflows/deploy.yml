@@ -17,6 +17,8 @@ jobs:
           node-version: 18
       - run: npm ci
       - run: npm run build
+      - name: Copy index.html to 404.html for GitHub Pages SPA support
+        run: cp dist/index.html dist/404.html
       - uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
