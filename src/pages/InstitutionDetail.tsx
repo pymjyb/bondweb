@@ -12,8 +12,10 @@ export default function InstitutionDetail() {
     const loadData = async () => {
       setLoading(true);
       try {
-        const baseUrl = import.meta.env.BASE_URL;
-        const csvPath = `${baseUrl}data/institutions.csv`;
+        const baseUrl = import.meta.env.BASE_URL || '/';
+        // Ensure baseUrl ends with / and doesn't have double slashes
+        const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+        const csvPath = `${normalizedBaseUrl}data/institutions.csv`;
         
         const data = await loadCSVData(csvPath);
         const csvInstitutions = data.map(toInstitution) as InstitutionEdit[];
@@ -24,7 +26,7 @@ export default function InstitutionDetail() {
         const found = merged.find((item) => item.id === id);
         setInstitution(found || null);
       } catch (error) {
-        console.error('Error loading data:', error);
+        console.error('❌ Error loading institution data:', error);
         setInstitution(null);
       } finally {
         setLoading(false);

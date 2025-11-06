@@ -69,16 +69,38 @@ export async function loadCSVData(filePath: string): Promise<Record<string, stri
   const separator = filePath.includes('?') ? '&' : '?';
   const urlWithCache = `${filePath}${separator}v=${Date.now()}`;
   
-  const response = await fetch(urlWithCache, {
-    cache: 'no-cache',
-  });
+  console.log('📊 Loading CSV from:', urlWithCache);
+  console.log('📊 BASE_URL:', import.meta.env.BASE_URL);
   
-  if (!response.ok) {
-    throw new Error(`Failed to load CSV: ${response.status} ${response.statusText}`);
+  try {
+    const response = await fetch(urlWithCache, {
+      cache: 'no-cache',
+    });
+    
+    console.log('📊 Response status:', response.status, response.statusText);
+    
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'No error details available');
+      console.error('❌ Failed to load CSV:', {
+        status: response.status,
+        statusText: response.statusText,
+        url: urlWithCache,
+        errorText: errorText.substring(0, 200)
+      });
+      throw new Error(`Failed to load CSV: ${response.status} ${response.statusText}. URL: ${urlWithCache}`);
+    }
+    
+    const csvText = await response.text();
+    console.log('✅ CSV loaded, length:', csvText.length, 'characters');
+    
+    const parsed = parseCSV(csvText);
+    console.log('✅ Parsed', parsed.length, 'institutions');
+    
+    return parsed;
+  } catch (error) {
+    console.error('❌ Error loading CSV:', error);
+    throw error;
   }
-  
-  const csvText = await response.text();
-  return parseCSV(csvText);
 }
 
 // Helper function to convert Record to Institution
