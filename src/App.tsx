@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Institutions from './pages/Institutions';
@@ -7,11 +8,29 @@ import Admin from './pages/Admin';
 import AdminLogin from './pages/AdminLogin';
 import RequestInstitution from './pages/RequestInstitution';
 
+// Component to handle GitHub Pages 404 redirects
+function RedirectHandler() {
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    // Check if we have a stored redirect from 404.html
+    const redirectRoute = sessionStorage.getItem('ghp_redirect');
+    if (redirectRoute) {
+      sessionStorage.removeItem('ghp_redirect');
+      // Navigate to the stored route
+      navigate(redirectRoute, { replace: true });
+    }
+  }, [navigate]);
+  
+  return null;
+}
+
 function App() {
   const basename = import.meta.env.BASE_URL.replace(/\/$/, '');
 
   return (
     <BrowserRouter basename={basename}>
+      <RedirectHandler />
       <div className="min-h-screen bg-gray-50">
         <Navbar />
         <Routes>

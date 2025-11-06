@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Finance Data Hub</title>
+    <script>
+      // GitHub Pages SPA routing fix
+      // When accessing a route directly (e.g., /bondweb/request-institution),
+      // GitHub Pages serves 404.html. We need to redirect to index.html
+      // while preserving the path so React Router can handle it.
+      (function() {
+        var basePath = '/bondweb';
+        var l = window.location;
+        var pathname = l.pathname;
+        
+        // Don't redirect if we're already on index.html or loading assets
+        if (pathname.includes('index.html') || pathname.includes('assets/')) {
+          return;
+        }
+        
+        // Extract the route (everything after /bondweb)
+        var route = pathname.replace(basePath, '') || '/';
+        
+        // If route is not just "/", redirect to index.html with the route in hash
+        // React Router will then handle the routing
+        if (route !== '/') {
+          // Redirect to index.html - React Router will see the hash and route accordingly
+          // Actually, better: just redirect to index.html and let React Router read the current path
+          // But we need to do this before React loads, so we'll use a different approach
+          // Store the route in sessionStorage and redirect
+          sessionStorage.setItem('ghp_redirect', route);
+          window.location.replace(basePath + '/index.html' + l.search + l.hash);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <p>Redirecting...</p>
+  </body>
+</html>
