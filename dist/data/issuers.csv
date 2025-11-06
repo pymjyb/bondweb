@@ -1,7 +1,0 @@
-id,name,description,image,keyData,contact,link
-us-treasury,US Treasury Department,The federal agency responsible for issuing US government bonds, notes, and bills to finance government operations.,,Total debt outstanding: $34+ trillion,contact@treasury.gov,https://www.treasury.gov
-uk-dmo,UK Debt Management Office,The executive agency of HM Treasury responsible for managing the UK government's debt and cash management.,,Total debt outstanding: £2.6+ trillion,info@dmo.gov.uk,https://www.dmo.gov.uk
-bundesfinanzministerium,German Federal Ministry of Finance,Responsible for issuing German government bonds (Bunds) through the Federal Finance Agency.,,Total debt outstanding: €2.3+ trillion,info@bundesfinanzministerium.de,https://www.bundesfinanzministerium.de
-boj,Bank of Japan,Japan's central bank involved in government bond issuance and monetary policy implementation.,,Total debt outstanding: ¥1,200+ trillion,info@boj.or.jp,https://www.boj.or.jp
-european-commission,European Commission,EU institution involved in coordinating government bond issuance for member states and EU programs.,,Total program funding: €800+ billion,info@ec.europa.eu,https://ec.europa.eu
-

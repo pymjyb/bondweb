@@ -1,20 +1,8 @@
-export interface Investor {
+export interface Institution {
   id: string;
   name: string;
+  category: string;
+  country: string;
   description: string;
-  image?: string;
-  keyData?: string;
-  contact?: string;
-  link?: string;
+  website: string;
 }
-
-export interface Issuer {
-  id: string;
-  name: string;
-  description: string;
-  image?: string;
-  keyData?: string;
-  contact?: string;
-  link?: string;
-}
-

@@ -32,7 +32,7 @@ function parseCSVLine(line: string): string[] {
 }
 
 export function parseCSV(csvText: string): Record<string, string>[] {
-  const lines = csvText.trim().split('\n');
+  const lines = csvText.trim().split('\n').filter(line => line.trim());
   if (lines.length === 0) return [];
 
   // Parse header
@@ -58,16 +58,24 @@ export function parseCSV(csvText: string): Record<string, string>[] {
 }
 
 export async function loadCSVData(filePath: string): Promise<Record<string, string>[]> {
-  try {
-    const response = await fetch(filePath);
-    if (!response.ok) {
-      throw new Error(`Failed to load ${filePath}: ${response.statusText}`);
-    }
-    const csvText = await response.text();
-    return parseCSV(csvText);
-  } catch (error) {
-    console.error(`Error loading CSV from ${filePath}:`, error);
-    return [];
+  const response = await fetch(filePath);
+  
+  if (!response.ok) {
+    throw new Error(`Failed to load CSV: ${response.status} ${response.statusText}`);
   }
+  
+  const csvText = await response.text();
+  return parseCSV(csvText);
 }
 
+// Helper function to convert Record to Institution
+export function toInstitution(data: Record<string, string>): import('../types').Institution {
+  return {
+    id: data.id || '',
+    name: data.name || '',
+    category: data.category || '',
+    country: data.country || '',
+    description: data.description || '',
+    website: data.website || '',
+  };
+}
