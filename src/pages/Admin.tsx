@@ -7,7 +7,7 @@ import {
   deleteInstitution,
 } from '../utils/institutionsService';
 import { Institution, InstitutionInput } from '../types';
-import { isAuthenticated, logout } from '../utils/auth';
+import { requireAdminSession, signOut } from '../utils/auth';
 
 interface FormField {
   key: keyof InstitutionInput;
@@ -40,6 +40,8 @@ export default function Admin() {
   const navigate = useNavigate();
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [loading, setLoading] = useState(true);
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -47,11 +49,31 @@ export default function Admin() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isAuthenticated()) {
-      navigate('/admin/login');
-      return;
-    }
-    loadInstitutions();
+    let isMounted = true;
+
+    const verify = async () => {
+      try {
+        const session = await requireAdminSession();
+        if (!isMounted) return;
+        if (!session) {
+          navigate('/admin/login', { replace: true });
+          return;
+        }
+        setIsAuthorized(true);
+        setCheckingSession(false);
+        await loadInstitutions();
+      } catch (err) {
+        console.error('Failed to verify admin session:', err);
+        if (!isMounted) return;
+        navigate('/admin/login', { replace: true });
+      }
+    };
+
+    verify();
+
+    return () => {
+      isMounted = false;
+    };
   }, [navigate]);
 
   const loadInstitutions = async () => {
@@ -180,6 +202,14 @@ export default function Admin() {
     return String(value);
   };
 
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-600">Verifying access…</div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -203,9 +233,12 @@ export default function Admin() {
           </div>
           <div className="flex gap-2">
             <button
-              onClick={() => {
-                logout();
-                navigate('/admin/login');
+              onClick={async () => {
+                try {
+                  await signOut();
+                } finally {
+                  navigate('/admin/login');
+                }
               }}
               className="px-4 py-2 text-red-700 hover:text-red-800 text-sm"
             >
@@ -233,13 +266,14 @@ export default function Admin() {
               setFormData(EMPTY_FORM);
               setEditingId(null);
             }}
-            className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-colors"
+            disabled={!isAuthorized || submitting}
+            className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-colors disabled:opacity-50"
           >
             {showAddForm ? 'Cancel' : '+ Add Institution'}
           </button>
           <button
             onClick={loadInstitutions}
-            disabled={submitting}
+            disabled={!isAuthorized || submitting}
             className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
           >
             Refresh
@@ -277,7 +311,7 @@ export default function Admin() {
             <div className="mt-4 flex gap-2">
               <button
                 onClick={handleAddInstitution}
-                disabled={submitting}
+                disabled={!isAuthorized || submitting}
                 className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-colors disabled:opacity-50"
               >
                 {submitting ? 'Saving...' : 'Add Institution'}
@@ -345,8 +379,8 @@ export default function Admin() {
                           <div className="flex gap-2">
                             <button
                               onClick={() => handleSaveEdit(inst.id)}
-                              disabled={submitting}
-                              className="text-green-600 hover:text-green-900"
+                              disabled={!isAuthorized || submitting}
+                              className="text-green-600 hover:text-green-900 disabled:opacity-50"
                             >
                               Save
                             </button>
@@ -361,13 +395,15 @@ export default function Admin() {
                           <div className="flex gap-2">
                             <button
                               onClick={() => startEditing(inst)}
-                              className="text-blue-600 hover:text-blue-900"
+                              disabled={!isAuthorized}
+                              className="text-blue-600 hover:text-blue-900 disabled:opacity-50"
                             >
                               Edit
                             </button>
                             <button
                               onClick={() => handleDelete(inst.id)}
-                              className="text-red-600 hover:text-red-900"
+                              disabled={!isAuthorized}
+                              className="text-red-600 hover:text-red-900 disabled:opacity-50"
                             >
                               Delete
                             </button>

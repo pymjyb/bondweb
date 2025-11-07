@@ -1,8 +1,9 @@
 import { useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { authenticate, getPasswordHint } from '../utils/auth';
+import { Link, useNavigate } from 'react-router-dom';
+import { signIn } from '../utils/auth';
 
 export default function AdminLogin() {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -13,16 +14,16 @@ export default function AdminLogin() {
     setError('');
     setLoading(true);
 
-    // Simulate a small delay to prevent brute force
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    if (authenticate(password)) {
+    try {
+      await signIn(email, password);
       navigate('/admin');
-    } else {
-      setError('Incorrect password. Please try again.');
-      setPassword('');
+    } catch (err) {
+      console.error('Failed to sign in:', err);
+      const message = err instanceof Error ? err.message : 'Unable to sign in';
+      setError(message === 'Invalid login credentials' ? 'Invalid email or password' : message);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -33,11 +34,29 @@ export default function AdminLogin() {
             Admin Access
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Please enter the password to access the admin panel
+            Sign in with your Supabase admin credentials
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
+          <div className="rounded-md shadow-sm space-y-4">
+            <div>
+              <label htmlFor="email" className="sr-only">
+                Email address
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="Email address"
+                disabled={loading}
+                autoFocus
+              />
+            </div>
             <div>
               <label htmlFor="password" className="sr-only">
                 Password
@@ -51,9 +70,8 @@ export default function AdminLogin() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Enter password"
+                placeholder="Password"
                 disabled={loading}
-                autoFocus
               />
             </div>
           </div>
@@ -63,7 +81,11 @@ export default function AdminLogin() {
               <div className="flex">
                 <div className="flex-shrink-0">
                   <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 </div>
                 <div className="ml-3">
@@ -73,30 +95,21 @@ export default function AdminLogin() {
             </div>
           )}
 
-          {getPasswordHint() && (
-            <div className="text-sm text-gray-500 text-center">
-              Hint: {getPasswordHint()}
-            </div>
-          )}
-
           <div>
             <button
               type="submit"
               disabled={loading}
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? 'Verifying...' : 'Sign in'}
+              {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
         </form>
 
         <div className="text-center">
-          <a
-            href="/"
-            className="text-sm text-blue-700 hover:text-blue-800"
-          >
+          <Link to="/" className="text-sm text-blue-700 hover:text-blue-800">
             ← Back to Home
-          </a>
+          </Link>
         </div>
       </div>
     </div>

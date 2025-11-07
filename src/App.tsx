@@ -7,6 +7,7 @@ import InstitutionDetail from './pages/InstitutionDetail';
 import Admin from './pages/Admin';
 import AdminLogin from './pages/AdminLogin';
 import RequestInstitution from './pages/RequestInstitution';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Component to handle GitHub Pages 404 redirects
 function RedirectHandler() {
@@ -39,7 +40,14 @@ function App() {
           <Route path="/institutions/:id" element={<InstitutionDetail />} />
           <Route path="/request-institution" element={<RequestInstitution />} />
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin" element={<Admin />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </div>
     </BrowserRouter>
