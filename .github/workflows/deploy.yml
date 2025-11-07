@@ -21,6 +21,8 @@ jobs:
         env:
           VITE_FORMSPREE_ID: ${{ secrets.VITE_FORMSPREE_ID }}
           VITE_ADMIN_EMAIL: ${{ secrets.VITE_ADMIN_EMAIL }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
       - name: Copy 404.html for GitHub Pages SPA routing
         run: |
           if [ -f public/404.html ]; then
