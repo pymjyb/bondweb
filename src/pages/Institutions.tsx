@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { loadCSVData, toInstitution } from '../utils/csvParser';
-import { mergeInstitutions, getStorageData, InstitutionEdit } from '../utils/storage';
+import { Institution } from '../types';
+import { fetchInstitutions } from '../utils/institutionsService';
 import InstitutionCard from '../components/InstitutionCard';
 
 export default function Institutions() {
-  const [institutions, setInstitutions] = useState<InstitutionEdit[]>([]);
-  const [filteredInstitutions, setFilteredInstitutions] = useState<InstitutionEdit[]>([]);
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
+  const [filteredInstitutions, setFilteredInstitutions] = useState<Institution[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -17,35 +17,12 @@ export default function Institutions() {
       setError(null);
       
       try {
-        const baseUrl = import.meta.env.BASE_URL || '/';
-        // Ensure baseUrl ends with / and doesn't have double slashes
-        const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
-        const csvPath = `${normalizedBaseUrl}data/institutions.csv`;
-        
-        console.log('🏦 Loading institutions from:', csvPath);
-        console.log('🏦 BASE_URL:', import.meta.env.BASE_URL);
-        console.log('🏦 Environment:', import.meta.env.MODE);
-        
-        const data = await loadCSVData(csvPath);
-        const csvInstitutions = data.map(toInstitution) as InstitutionEdit[];
-        
-        console.log('🏦 Loaded', csvInstitutions.length, 'institutions from CSV');
-        
-        // Merge with localStorage edits
-        const storageData = getStorageData();
-        const merged = mergeInstitutions(csvInstitutions, storageData.customFields);
-        
-        console.log('🏦 After merge:', merged.length, 'institutions');
-        setInstitutions(merged);
-        setFilteredInstitutions(merged);
+        const records = await fetchInstitutions();
+        setInstitutions(records);
+        setFilteredInstitutions(records);
       } catch (err) {
         console.error('❌ Failed to load institutions:', err);
         const errorMessage = err instanceof Error ? err.message : 'Failed to load data';
-        console.error('Error details:', {
-          message: errorMessage,
-          error: err,
-          baseUrl: import.meta.env.BASE_URL,
-        });
         setError(errorMessage);
       } finally {
         setLoading(false);

@@ -1,30 +1,24 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { loadCSVData, toInstitution } from '../utils/csvParser';
-import { mergeInstitutions, getStorageData, InstitutionEdit } from '../utils/storage';
+import { Institution } from '../types';
+import { fetchInstitutionById } from '../utils/institutionsService';
 
 export default function InstitutionDetail() {
   const { id } = useParams<{ id: string }>();
-  const [institution, setInstitution] = useState<InstitutionEdit | null>(null);
+  const [institution, setInstitution] = useState<Institution | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       try {
-        const baseUrl = import.meta.env.BASE_URL || '/';
-        // Ensure baseUrl ends with / and doesn't have double slashes
-        const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
-        const csvPath = `${normalizedBaseUrl}data/institutions.csv`;
-        
-        const data = await loadCSVData(csvPath);
-        const csvInstitutions = data.map(toInstitution) as InstitutionEdit[];
-        
-        // Merge with localStorage edits
-        const storageData = getStorageData();
-        const merged = mergeInstitutions(csvInstitutions, storageData.customFields);
-        const found = merged.find((item) => item.id === id);
-        setInstitution(found || null);
+        if (!id) {
+          setInstitution(null);
+          return;
+        }
+
+        const record = await fetchInstitutionById(id);
+        setInstitution(record);
       } catch (error) {
         console.error('❌ Error loading institution data:', error);
         setInstitution(null);
@@ -107,33 +101,39 @@ export default function InstitutionDetail() {
             </div>
           )}
 
-          {/* Custom Fields and Additional Fields */}
+          {/* Additional fields beyond the core set */}
           {(() => {
-            const additionalFields = Object.keys(institution).filter(key => 
-              !['id', 'name', 'category', 'country', 'description', 'website'].includes(key)
-            );
-            
+            const excludedKeys = ['id', 'name', 'category', 'country', 'description', 'website'];
+            const additionalFields = Object.keys(institution).filter((key) => !excludedKeys.includes(key));
+
             if (additionalFields.length === 0) return null;
-            
+
             return (
               <div className="border-t border-gray-200 pt-6">
                 <h2 className="text-lg font-semibold text-gray-800 mb-3">Additional Information</h2>
                 <dl className="space-y-3">
-                  {additionalFields.map(key => {
+                  {additionalFields.map((key) => {
                     const value = institution[key];
-                    // Show field even if empty, but skip if truly empty
-                    if (!value || value.trim() === '') return null;
-                    
-                    // Format field name: handle spaces and camelCase
+                    if (value === undefined || value === null || value === '') {
+                      return null;
+                    }
+
+                    const displayValue =
+                      typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value);
+
+                    if (displayValue.trim() === '') {
+                      return null;
+                    }
+
                     const formattedKey = key
-                      .replace(/([A-Z])/g, ' $1') // Add space before capitals
-                      .replace(/^./, str => str.toUpperCase()) // Capitalize first letter
+                      .replace(/([A-Z])/g, ' $1')
+                      .replace(/^./, (str) => str.toUpperCase())
                       .trim();
-                    
+
                     return (
                       <div key={key}>
                         <dt className="text-sm font-medium text-gray-500">{formattedKey}</dt>
-                        <dd className="mt-1 text-gray-900">{value}</dd>
+                        <dd className="mt-1 text-gray-900 whitespace-pre-wrap">{displayValue}</dd>
                       </div>
                     );
                   })}

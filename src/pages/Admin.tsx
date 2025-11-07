@@ -1,122 +1,184 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { loadCSVData, toInstitution } from '../utils/csvParser';
 import {
-  getStorageData,
-  addInstitution,
+  fetchInstitutions,
+  createInstitution,
   updateInstitution,
   deleteInstitution,
-  addCustomField,
-  removeCustomField,
-  clearAllEdits,
-  mergeInstitutions,
-  downloadCSV,
-  InstitutionEdit,
-} from '../utils/storage';
+} from '../utils/institutionsService';
+import { Institution, InstitutionInput } from '../types';
 import { isAuthenticated, logout } from '../utils/auth';
+
+interface FormField {
+  key: keyof InstitutionInput;
+  label: string;
+  required?: boolean;
+  type?: 'text' | 'textarea' | 'number' | 'url';
+}
+
+const FORM_FIELDS: FormField[] = [
+  { key: 'id', label: 'ID', required: true },
+  { key: 'name', label: 'Name', required: true },
+  { key: 'category', label: 'Category' },
+  { key: 'country', label: 'Country' },
+  { key: 'website', label: 'Website', type: 'url' },
+  { key: 'total_assets', label: 'Total Assets (USD bn)', type: 'number' },
+  { key: 'description', label: 'Description', type: 'textarea' },
+];
+
+const EMPTY_FORM: Partial<InstitutionInput> = {
+  id: '',
+  name: '',
+  category: '',
+  country: '',
+  website: '',
+  total_assets: undefined,
+  description: '',
+};
 
 export default function Admin() {
   const navigate = useNavigate();
-  const [institutions, setInstitutions] = useState<InstitutionEdit[]>([]);
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [newFieldName, setNewFieldName] = useState('');
-  const [formData, setFormData] = useState<Partial<InstitutionEdit>>({});
-  const [customFields, setCustomFields] = useState<string[]>([]);
+  const [formData, setFormData] = useState<Partial<InstitutionInput>>(EMPTY_FORM);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check authentication
     if (!isAuthenticated()) {
       navigate('/admin/login');
       return;
     }
-    loadData();
+    loadInstitutions();
   }, [navigate]);
 
-  const loadData = async () => {
+  const loadInstitutions = async () => {
     setLoading(true);
+    setError(null);
     try {
-      const baseUrl = import.meta.env.BASE_URL;
-      const csvPath = `${baseUrl}data/institutions.csv`;
-      const data = await loadCSVData(csvPath);
-      const csvInsts = data.map(toInstitution) as InstitutionEdit[];
-      
-      const storageData = getStorageData();
-      setCustomFields(storageData.customFields);
-      
-      const merged = mergeInstitutions(csvInsts, storageData.customFields);
-      setInstitutions(merged);
+      const records = await fetchInstitutions();
+      setInstitutions(records);
     } catch (err) {
-      console.error('Failed to load data:', err);
+      console.error('Failed to load institutions:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load data');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAddField = () => {
-    if (newFieldName.trim() && !customFields.includes(newFieldName.trim())) {
-      addCustomField(newFieldName.trim());
-      setCustomFields([...customFields, newFieldName.trim()]);
-      setNewFieldName('');
-      loadData(); // Reload to apply field to all entries
-    }
+  const resetForm = () => {
+    setFormData(EMPTY_FORM);
+    setShowAddForm(false);
+    setEditingId(null);
   };
 
-  const handleRemoveField = (fieldName: string) => {
-    removeCustomField(fieldName);
-    setCustomFields(customFields.filter(f => f !== fieldName));
-    loadData();
+  const handleFieldChange = (key: keyof InstitutionInput, value: string) => {
+    setFormData((prev) => {
+      const next = { ...prev };
+      if (key === 'total_assets') {
+        next[key] = value === '' ? null : Number(value);
+      } else {
+        next[key] = value;
+      }
+      return next;
+    });
   };
 
-  const handleAdd = () => {
+  const handleAddInstitution = async () => {
     if (!formData.id || !formData.name) {
       alert('ID and Name are required');
       return;
     }
-    
-    // Check if ID already exists
-    if (institutions.some(inst => inst.id === formData.id)) {
-      alert('An institution with this ID already exists');
-      return;
-    }
-    
-    addInstitution(formData as InstitutionEdit);
-    setShowAddForm(false);
-    setFormData({});
-    loadData();
-  };
 
-  const handleUpdate = (id: string) => {
-    const inst = institutions.find(i => i.id === id);
-    if (inst) {
-      updateInstitution(id, inst);
-      setEditingId(null);
-      loadData();
-    }
-  };
+    setSubmitting(true);
+    setError(null);
+    try {
+      const payload: InstitutionInput = {
+        ...EMPTY_FORM,
+        ...formData,
+        total_assets:
+          formData.total_assets === undefined || formData.total_assets === null
+            ? null
+            : Number(formData.total_assets),
+      } as InstitutionInput;
 
-  const handleDelete = (id: string) => {
-    if (confirm('Are you sure you want to delete this institution?')) {
-      deleteInstitution(id);
-      loadData();
+      await createInstitution(payload);
+      await loadInstitutions();
+      resetForm();
+    } catch (err) {
+      console.error('Failed to create institution:', err);
+      setError(err instanceof Error ? err.message : 'Failed to create institution');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const handleExport = () => {
-    downloadCSV(institutions, 'institutions_updated.csv');
-  };
-
-  const handleClear = () => {
-    if (confirm('Are you sure you want to clear all edits? This cannot be undone.')) {
-      clearAllEdits();
-      loadData();
+  const handleSaveEdit = async (id: string) => {
+    setSubmitting(true);
+    setError(null);
+    try {
+      const payload: Partial<InstitutionInput> = {
+        ...formData,
+        total_assets:
+          formData.total_assets === undefined || formData.total_assets === null
+            ? null
+            : Number(formData.total_assets),
+      };
+      await updateInstitution(id, payload);
+      await loadInstitutions();
+      resetForm();
+    } catch (err) {
+      console.error('Failed to update institution:', err);
+      setError(err instanceof Error ? err.message : 'Failed to update institution');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const allFields = institutions.length > 0 
-    ? Object.keys(institutions[0])
-    : ['id', 'name', 'category', 'country', 'description', 'website', ...customFields];
+  const handleDelete = async (id: string) => {
+    const confirmed = window.confirm('Are you sure you want to delete this institution?');
+    if (!confirmed) return;
+
+    setSubmitting(true);
+    setError(null);
+    try {
+      await deleteInstitution(id);
+      await loadInstitutions();
+    } catch (err) {
+      console.error('Failed to delete institution:', err);
+      setError(err instanceof Error ? err.message : 'Failed to delete institution');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const startEditing = (record: Institution) => {
+    setEditingId(record.id);
+    setFormData({
+      id: record.id,
+      name: record.name ?? '',
+      category: record.category ?? '',
+      country: record.country ?? '',
+      website: record.website ?? '',
+      total_assets:
+        record.total_assets === undefined || record.total_assets === null
+          ? null
+          : Number(record.total_assets),
+      description: record.description ?? '',
+    });
+  };
+
+  const formatDisplayValue = (value: unknown): string => {
+    if (value === null || value === undefined) {
+      return '';
+    }
+    if (typeof value === 'object') {
+      return JSON.stringify(value);
+    }
+    return String(value);
+  };
 
   if (loading) {
     return (
@@ -124,7 +186,7 @@ export default function Admin() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-700"></div>
-            <p className="mt-4 text-gray-600">Loading...</p>
+            <p className="mt-4 text-gray-600">Loading institutions...</p>
           </div>
         </div>
       </div>
@@ -137,7 +199,7 @@ export default function Admin() {
         <div className="mb-8 flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-800 mb-2">Admin Panel</h1>
-            <p className="text-gray-600">Manage institutions and custom fields</p>
+            <p className="text-gray-600">Manage institutions stored in Supabase</p>
           </div>
           <div className="flex gap-2">
             <button
@@ -158,119 +220,89 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* Custom Fields Section */}
-        <div className="bg-white rounded-xl shadow-md p-6 mb-6 border border-gray-100">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Custom Fields</h2>
-          <div className="flex gap-2 mb-4">
-            <input
-              type="text"
-              value={newFieldName}
-              onChange={(e) => setNewFieldName(e.target.value)}
-              placeholder="New field name (e.g., 'foundedYear', 'assets')"
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              onKeyPress={(e) => e.key === 'Enter' && handleAddField()}
-            />
-            <button
-              onClick={handleAddField}
-              className="px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors"
-            >
-              Add Field
-            </button>
+        {error && (
+          <div className="mb-6 rounded-md bg-red-50 p-4 text-red-700 text-sm">
+            {error}
           </div>
-          {customFields.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {customFields.map(field => (
-                <span
-                  key={field}
-                  className="inline-flex items-center px-3 py-1 bg-blue-50 text-blue-700 rounded-md text-sm"
-                >
-                  {field}
-                  <button
-                    onClick={() => handleRemoveField(field)}
-                    className="ml-2 text-blue-700 hover:text-blue-900"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
+        )}
 
-        {/* Actions */}
         <div className="flex gap-4 mb-6">
           <button
-            onClick={() => setShowAddForm(!showAddForm)}
+            onClick={() => {
+              setShowAddForm((prev) => !prev);
+              setFormData(EMPTY_FORM);
+              setEditingId(null);
+            }}
             className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-colors"
           >
             {showAddForm ? 'Cancel' : '+ Add Institution'}
           </button>
           <button
-            onClick={handleExport}
-            className="px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors"
+            onClick={loadInstitutions}
+            disabled={submitting}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
           >
-            Export CSV
-          </button>
-          <button
-            onClick={handleClear}
-            className="px-4 py-2 bg-red-700 text-white rounded-lg hover:bg-red-800 transition-colors"
-          >
-            Clear All Edits
+            Refresh
           </button>
         </div>
 
-        {/* Add Form */}
         {showAddForm && (
           <div className="bg-white rounded-xl shadow-md p-6 mb-6 border border-gray-100">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Add New Institution</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {allFields.map(field => (
-                <div key={field}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {field} {field === 'id' || field === 'name' ? '*' : ''}
+              {FORM_FIELDS.map((field) => (
+                <div key={field.key} className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-700 mb-1">
+                    {field.label} {field.required && <span className="text-red-500">*</span>}
                   </label>
-                  <input
-                    type="text"
-                    value={formData[field] || ''}
-                    onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required={field === 'id' || field === 'name'}
-                  />
+                  {field.type === 'textarea' ? (
+                    <textarea
+                      value={(formData[field.key] as string) ?? ''}
+                      onChange={(e) => handleFieldChange(field.key, e.target.value)}
+                      rows={4}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  ) : (
+                    <input
+                      type={field.type === 'number' ? 'number' : field.type ?? 'text'}
+                      value={(formData[field.key] ?? '') as string | number}
+                      onChange={(e) => handleFieldChange(field.key, e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required={field.required}
+                    />
+                  )}
                 </div>
               ))}
             </div>
             <div className="mt-4 flex gap-2">
               <button
-                onClick={handleAdd}
-                className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-colors"
+                onClick={handleAddInstitution}
+                disabled={submitting}
+                className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-colors disabled:opacity-50"
               >
-                Add Institution
+                {submitting ? 'Saving...' : 'Add Institution'}
               </button>
               <button
-                onClick={() => {
-                  setShowAddForm(false);
-                  setFormData({});
-                }}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                onClick={resetForm}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
               >
-                Cancel
+                Reset
               </button>
             </div>
           </div>
         )}
 
-        {/* Institutions Table */}
         <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  {allFields.map(field => (
+                  {FORM_FIELDS.map((field) => (
                     <th
-                      key={field}
+                      key={field.key}
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      {field}
+                      {field.label}
                     </th>
                   ))}
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -279,75 +311,76 @@ export default function Admin() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {institutions.map((inst) => (
-                  <tr key={inst.id} className={editingId === inst.id ? 'bg-blue-50' : ''}>
-                    {allFields.map(field => (
-                      <td key={field} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {editingId === inst.id ? (
-                          <input
-                            type="text"
-                            value={inst[field] || ''}
-                            onChange={(e) => {
-                              const updated = institutions.map(i =>
-                                i.id === inst.id ? { ...i, [field]: e.target.value } : i
-                              );
-                              setInstitutions(updated);
-                            }}
-                            className="w-full px-2 py-1 border border-gray-300 rounded"
-                          />
+                {institutions.map((inst) => {
+                  const isEditing = editingId === inst.id;
+                  return (
+                    <tr key={inst.id} className={isEditing ? 'bg-blue-50' : ''}>
+                      {FORM_FIELDS.map((field) => (
+                        <td key={field.key} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {isEditing ? (
+                            field.type === 'textarea' ? (
+                              <textarea
+                                value={(formData[field.key] as string) ?? ''}
+                                onChange={(e) => handleFieldChange(field.key, e.target.value)}
+                                rows={2}
+                                className="w-full px-2 py-1 border border-gray-300 rounded"
+                              />
+                            ) : (
+                              <input
+                                type={field.type === 'number' ? 'number' : field.type ?? 'text'}
+                                value={(formData[field.key] ?? '') as string | number}
+                                onChange={(e) => handleFieldChange(field.key, e.target.value)}
+                                className="w-full px-2 py-1 border border-gray-300 rounded"
+                              />
+                            )
+                          ) : (
+                            <div className="truncate max-w-xs">
+                              {formatDisplayValue(inst[field.key]) || '—'}
+                            </div>
+                          )}
+                        </td>
+                      ))}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        {isEditing ? (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleSaveEdit(inst.id)}
+                              disabled={submitting}
+                              className="text-green-600 hover:text-green-900"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={resetForm}
+                              className="text-gray-600 hover:text-gray-900"
+                            >
+                              Cancel
+                            </button>
+                          </div>
                         ) : (
-                          <div className="truncate max-w-xs">{inst[field] || '-'}</div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => startEditing(inst)}
+                              className="text-blue-600 hover:text-blue-900"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDelete(inst.id)}
+                              className="text-red-600 hover:text-red-900"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         )}
                       </td>
-                    ))}
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      {editingId === inst.id ? (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleUpdate(inst.id)}
-                            className="text-green-600 hover:text-green-900"
-                          >
-                            Save
-                          </button>
-                          <button
-                            onClick={() => {
-                              setEditingId(null);
-                              loadData();
-                            }}
-                            className="text-gray-600 hover:text-gray-900"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => setEditingId(inst.id)}
-                            className="text-blue-600 hover:text-blue-900"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDelete(inst.id)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         </div>
-
-        {institutions.length === 0 && (
-          <div className="text-center py-12 bg-white rounded-xl shadow-md border border-gray-100">
-            <p className="text-gray-500">No institutions found.</p>
-          </div>
-        )}
       </div>
     </div>
   );
